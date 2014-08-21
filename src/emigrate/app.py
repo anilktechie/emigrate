@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import os
 import sys
 import time
 
@@ -46,8 +47,29 @@ class Application(object):
         params = ()
         return self._query(query, params).addCallback(self._showCreateTableResult, table_name)
 
-    def run(self):
+    def _internalError(self, reason):
+        reactor.stop()
+
+    def _restoreMigration(self):
+        # Step 1. Reading migration
+        currentDirectory = os.getcwd()
+        currentMigrationsDirectory = os.path.join(currentDirectory, ".migrations")
+        migrationNameList = os.listdir(currentMigrationsDirectory)
+        migrationNameList = sort(migrationNameList) # TODO - check sorting ...
+        for migrationName in migrationNameList:
+        
         self.showTables()
-        #reactor.callLater(2.5, reactor.stop)
+
+    def run(self):
+        reactor.callLater(0.0, self._restoreMigration)
         reactor.run()
         return self._result
+
+
+def main():
+    app = Application()
+    app.run()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
