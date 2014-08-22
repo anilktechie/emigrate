@@ -25,6 +25,10 @@ class ApplicationCommandUp(ApplicationCommand):
         #
         migrationActor = MigrationActor(dbClient=dbClient)
         for migration in migrations:
-            migrationActor.makeMigrate(migration=migration, direction=MigrationActor.Direction.UP, cb=self._migrationProcess)
+            try:
+                migrationActor.makeMigrate(migration=migration, direction=MigrationActor.Direction.UP, cb=self._migrationProcess)
+
+            except Exception as err:
+                self.__log.exception(err)
         #
         dbClient.close()

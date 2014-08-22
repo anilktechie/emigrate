@@ -2,7 +2,6 @@
 
 import sys
 import logging
-import ConfigParser as configparser
 
 from app_create import ApplicationCommandCreate
 from app_help import ApplicationCommandHelp
@@ -11,29 +10,24 @@ from app_down import ApplicationCommandDown
 from app_history import ApplicationCommandHistory
 from app_redo import ApplicationCommandRedo
 
+from options_reader import OptionsReader
+
 
 class Application(object):
     """ Migrate is database update tools
     """
 
     def __init__(self):
-        self._setting_path = ".emigraterc"
-        self._settings = None
         #
-        # self.__log = Logger(self.__class__)
+        self._params = None
+        #
         self.__log = logging.getLogger("emigrate")
-        self._settings = self._read_settings(self._setting_path)
-        self.__log.debug("settings = %r", self._settings)
+        #
+        self._readingOptions()
 
-    def _read_settings(self, name):
-        result = {}
-        config = configparser.RawConfigParser()
-        config.read(name)
-        if config.has_section("databaseConnection"):
-            items = config.items("databaseConnection")
-            for name, value in items:
-                result[name] = value
-        return result
+    def _readingOptions(self):
+        optionsReader = OptionsReader()
+        self._params = optionsReader.read(".emigraterc")
 
     def _do_CREATE(self, name):
         commandCreate = ApplicationCommandCreate(app=self)
