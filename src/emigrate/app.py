@@ -1,74 +1,108 @@
-#!/usr/bin/python
+#
 
-import os
 import sys
-import time
+import logging
+import ConfigParser as configparser
 
-from twisted.enterprise import adbapi
-from twisted.internet import reactor
+from app_create import ApplicationCommandCreate
+from app_help import ApplicationCommandHelp
+from app_up import ApplicationCommandUp
+from app_down import ApplicationCommandDown
+from app_history import ApplicationCommandHistory
+from app_redo import ApplicationCommandRedo
 
 
 class Application(object):
-    def __init__(self, database=None):
-        self._dbpool = adbapi.ConnectionPool("mysql.connector", database='', host='', port=3306, user="root", password='')
-        self._result = 0
-        self._table_count = None
+    """ Migrate is database update tools
+    """
 
-    def _query(self, query, params):
-       """
-       :rtype: Future<ResultSet<HasMap<String, Object>>>
-       """
-       return self._dbpool.runQuery(query, params)
+    def __init__(self):
+        self._setting_path = ".emigraterc"
+        self._settings = None
+        #
+        # self.__log = Logger(self.__class__)
+        self.__log = logging.getLogger("emigrate")
+        self._settings = self._read_settings(self._setting_path)
+        self.__log.debug("settings = %r", self._settings)
 
-    def _showCreateTableResult(self, rows, table_name):
-        #print table_name
-        for row in rows:
-            (table_name, text) = row
-            print("%s;\n\n" % text)
-        # Step 2. Done
-        self._table_count -= 1
-        if self._table_count == 0:
-            reactor.stop()
+    def _read_settings(self, name):
+        result = {}
+        config = configparser.RawConfigParser()
+        config.read(name)
+        if config.has_section("databaseConnection"):
+            items = config.items("databaseConnection")
+            for name, value in items:
+                result[name] = value
+        return result
 
-    def _showTablesResult(self, rows):
-        self._table_count = len(rows)
-        for row in rows:
-            (table_name, ) = row
-            #print("Dump %s..." % table_name)
-            self.showCreateTable(table_name)
+    def _do_CREATE(self, name):
+        commandCreate = ApplicationCommandCreate(app=self)
+        commandCreate.run()
 
-    def showTables(self):
-        query = "SHOW TABLES";
-        params = ()
-        return self._query(query, params).addCallback(self._showTablesResult)
+    def _do_UP(self, step=None):
+        commandUp = ApplicationCommandUp(app=self)
+        commandUp.run()
 
-    def showCreateTable(self, table_name):
-        query = "SHOW CREATE TABLE `%s`" % table_name;
-        params = ()
-        return self._query(query, params).addCallback(self._showCreateTableResult, table_name)
+    def _do_DOWN(self, step=None):
+        commandDown = ApplicationCommandDown(app=self)
+        commandDown.run()
 
-    def _internalError(self, reason):
-        reactor.stop()
+    def _do_REDO(self, name):
+        commandRedo = ApplicationCommandRedo(app=self)
+        commandRedo.run()
 
-    def _restoreMigration(self):
-        # Step 1. Reading migration
-        currentDirectory = os.getcwd()
-        currentMigrationsDirectory = os.path.join(currentDirectory, ".migrations")
-        migrationNameList = os.listdir(currentMigrationsDirectory)
-        migrationNameList = sort(migrationNameList) # TODO - check sorting ...
-        for migrationName in migrationNameList:
-        
-        self.showTables()
+    def _do_HISTORY(self):
+        commandHistory = ApplicationCommandHistory(app=self)
+        commandHistory.run()
 
-    def run(self):
-        reactor.callLater(0.0, self._restoreMigration)
-        reactor.run()
-        return self._result
+    def _do_HELP(self):
+        commandHelp = ApplicationCommandHelp(app=self)
+        commandHelp.run()
+
+    def _do_UNKNOWN(self):
+        content = "Unknown command.\n"
+        sys.stdout.write(content)
+
+    def dispose(self):
+        pass
+
+    def run(self, argv):
+        argc = len(argv)
+        if argc > 1:
+            if argv[1] == "create":
+                name = ""
+                if argc > 2:
+                    name = argv[2]
+                self._do_CREATE(name)
+            elif argv[1] == "redo":
+                name = ""
+                if argc > 2:
+                    name = argv[2]
+                self._do_REDO(name)
+            elif argv[1] == "up":
+                step = None
+                if argc > 2:
+                    step = argv[2]
+                self._do_UP(step)
+            elif argv[1] == "down":
+                step = None
+                if argc > 2:
+                    step = argv[2]
+                self._do_DOWN(step)
+            elif argv[1] == "history":
+                self._do_HISTORY()
+            elif argv[1] == "help":
+                self._do_HELP()
+            else:
+                self._do_UNKNOWN()
+        else:
+            self._do_HELP()
+        return 0
 
 
 def main():
     app = Application()
-    app.run()
+    app.run(sys.argv)
 
 
 if __name__ == "__main__":
