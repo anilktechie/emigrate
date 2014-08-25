@@ -5,43 +5,49 @@ Emigrate is Python 2.x console application to migration MySQL database store on 
 
 ### Quick start and example
 
-1. Create migration in ".migrations" directory of your product
+1. Create new migration in ".migrations" directory of your product
 
-```py
-class Migration_20140212165434(Migration):
-    def up(self):
-        # Step 1. Create table (we may also check database exist to provide idempotency)
-        query = "CREATE TABLE `example` ..."
-        self.execute(query)
-        # Step 2. You may execute insert SQL
-        query = "INSERT ..."
-        self.execute(query)
-        # Step 3. Another way to populate database
-        self.insert("")
+    ```bash
+    $ emig create
+    ```
 
-    def down(self):
-        # Step 1. Drop table
-        query = "DROP TABLE `example`"
-        self.execute(query)
-```
+2. Make change your migration
 
-2. Create ".emigrate" this is settings
+    ```py
+    class Migration_20140212165434(Migration):
+        """ Create `users` tables and insert admin account
+        """
+        
+        def up(self):
+            # Step 1. Create table (we may also check database exist to provide idempotency)
+            query = "CREATE TABLE `example` ..."
+            self.execute(query)
+            # Step 2. You may execute insert SQL
+            query = "INSERT ..."
+            self.execute(query)
+            # Step 3. Another way to populate database
+            self.insert("")
 
-```
-[core]
-db.type=mysql
-db.schema="smm"
-db.host=...
-db.port=...
-db.username=...
-db.password=...
-```
+        def down(self):
+            # Step 1. Drop table
+            query = "DROP TABLE `example`"
+            self.execute(query)
+    ```
+
+2. Create or update ".emigraterc"
+
+    ```ini
+    [database]
+    type=mysql
+    schema="smm"
+    host=...
+    port=...
+    username=...
+    password=...
+    ```
 
 3. Emigrate your migrations to "up".
-```bash
-$ emig up
-```
 
-4. ...
-
-5. PROFIT
+    ```bash
+    $ emig up
+    ```
