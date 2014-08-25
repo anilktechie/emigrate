@@ -1,6 +1,8 @@
 #
 import logging
 
+from emigrate import Migration
+
 
 class MigrationActor(object):
     class Direction(object):
@@ -11,30 +13,19 @@ class MigrationActor(object):
         self._dbClient = dbClient
         self.__log = logging.getLogger("emigrate.MigrationActor")
 
-    def _migrate(self, migration_cls, op, cb=None):
-        """
-        :type migration_cls: type
-        :type op: int
-        :type cb: callable
+    def makeMigrate(self, migrationCls, direction):
+        """ Make migration
+        :type migrationCls: Migration
+        :type direction: Direction
         :rtype: bool
         """
-        result = None
-        #if isi
-        inst = migration_cls(self._dbClient)
-        if callable(cb):
-            cb(migration=inst, op=op)
-        if op == MigrationActor.Direction.UP:
-            inst.up()
-        elif op == MigrationActor.Direction.DOWN:
-            inst.down()
+        assert issubclass(migrationCls, Migration)  # WARNING - subclass is not check that is it instance
+        # Step 1. Create migration instance
+        migrationInst = migrationCls(dbClient=self._dbClient)
+        # Step 2. Make migration
+        if direction == MigrationActor.Direction.UP:
+            migrationInst.up()
+        elif direction == MigrationActor.Direction.DOWN:
+            migrationInst.down()
         else:
-            raise Exception("Unknown operation.")
-        return result
-
-    def migrate(self, operation, step=None, cb=None):
-        if operation == MigrationDispatcher.Operation.UP:
-            self._migrate_up(step, cb=cb)
-        elif operation == MigrationDispatcher.Operation.DOWN:
-            self._migrate_down(step, cb=cb)
-        else:
-            raise Exception("Not yet implemented")
+            raise ValueError("Wrong direction.")

@@ -50,12 +50,30 @@ class ApplicationCommandCreate(ApplicationCommand):
         result = self._prepareTemplate(templateContent, params)
         return result
 
+    def _makeOptions(self):
+        #
+        lines = []
+        lines.append("[database]")
+        lines.append("host=127.0.0.1")
+        lines.append("database=test")
+        lines.append("user=root")
+        lines.append("password=1111")
+        #
+        content = "\n".join(lines)
+        with open(".emigraterc", "w") as stream:
+            stream.write(content)
+            stream.close()
+
     def run(self):
+        # Step 0. Prepare parameters
         currentDateTime = datetime.datetime.today()
         params = {
             "ClassName": self._createClassName(currentDateTime),
             "FileName": self._createFileName(currentDateTime),
         }
+        # Step 1. Create settings
+        if not os.path.isfile(".emigraterc"):
+            self._makeOptions()
         # Step 2. Create content
         content = self._makeContent(params)
         # Step 3. Create path

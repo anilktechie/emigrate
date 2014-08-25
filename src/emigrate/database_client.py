@@ -36,14 +36,23 @@ class DatabaseClient(object):
 
     def execute(self, query, params):
         dbCursor = self._cnx.cursor()
+        dbCursor.execute(query, params)
         dbCursor.close()
+
+    def commit(self):
+        self._cnx.commit()
+
+    def rollback(self):
+        self._cnx.rollback()
 
     def query(self, query, params):
         """
         """
-        assert(self._cnx, )
         result = []
         dbCursor = self._cnx.cursor()
+        dbCursor.query(query, params)
+        for row in dbCursor:
+            result.append(row)
         dbCursor.close()
         return result
 
