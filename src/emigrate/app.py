@@ -63,30 +63,14 @@ class Application(object):
     def run(self, argv):
         argc = len(argv)
         if argc > 1:
-            if argv[1] == "create":
-                name = ""
-                if argc > 2:
-                    name = argv[2]
-                self._do_CREATE(name)
-            elif argv[1] == "redo":
-                name = ""
-                if argc > 2:
-                    name = argv[2]
-                self._do_REDO(name)
-            elif argv[1] == "up":
-                step = None
-                if argc > 2:
-                    step = argv[2]
-                self._do_UP(step)
-            elif argv[1] == "down":
-                step = None
-                if argc > 2:
-                    step = argv[2]
-                self._do_DOWN(step)
-            elif argv[1] == "history":
-                self._do_HISTORY()
-            elif argv[1] == "help":
-                self._do_HELP()
+            commandName = str(argv[1])
+            methodName = "_" + "do" + "_" + commandName.upper()
+            method = getattr(self, methodName, None)
+            if method is not None:
+                if callable(method):
+                    method()
+                else:
+                    raise Exception('Internal Server Error')
             else:
                 self._do_UNKNOWN()
         else:
