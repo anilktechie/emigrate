@@ -15,6 +15,34 @@ class Migration(object):
         isinstance(dbClient, DatabaseClient)
         self._dbClient = dbClient
 
+    def insert(self, tableName, values):
+        """ Insert value to database
+        @type tableName: str
+        @type values: dict
+        """
+        assert isinstance(tableName, str)
+        assert isinstance(values, dict)
+        #
+        params = {}
+        #
+        columnNames = []
+        columnValues = []
+        currentParamCount = 1
+        #
+        for name, value in values.items():
+            #
+            paramName = "param%d" % (currentParamCount, )
+            currentParamCount += 1
+            #
+            columnNames.append( "`" + name + "`" )
+            columnValues.append( "%(" + paramName + ")s" )
+            #
+            params[paramName] = value
+        #
+        query = "INSERT INTO `" + tableName + "` (" + (", ".join(columnNames)) + ") VALUES ("  + (", ".join(columnValues)) + ")"
+        print("Execute: %r with %r" % (query, params, ))
+        self._execute(query, params)
+
     def _execute(self, query, params=None):
         self._dbClient.execute(query, params)
 
@@ -35,3 +63,15 @@ class Migration(object):
     @abstractmethod
     def down(self):
         pass
+
+
+if __name__ == "__main__":
+    class Migration1(Migration):
+        def up(self):
+            pass
+        def down(self):
+            pass 
+    conn = None
+    m = Migration1(conn)
+    m.insert("abc", {"name": "Vitold S", "id": 1, "value": "132.23"})
+
