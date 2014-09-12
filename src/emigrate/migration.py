@@ -43,6 +43,18 @@ class Migration(object):
         print("Execute: %r with %r" % (query, params, ))
         self._execute(query, params)
 
+    def drop(self, tableName):
+        assert isinstance(tableName, (str, unicode))
+        #self.__log.debug("Drop table " + tableName + "...")
+        query = "DROP TABLE " + "`" + tableName + "`"
+        self._execute(query)
+
+    def dropIfExists(self, tableName):
+        assert isinstance(tableName, (str, unicode))
+        #self.__log.debug("Drop table " + tableName + "...")
+        query = "DROP TABLE IF EXISTS " + "`" + tableName + "`"
+        self._execute(query)
+
     def _execute(self, query, params=None):
         self._dbClient.execute(query, params)
 
