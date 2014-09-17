@@ -58,7 +58,7 @@ class Migration(object):
         assert isinstance(triggerName, (str, unicode))
         assert isinstance(ifExists, bool)
         #
-        if ifExists ie True:
+        if ifExists is True:
             query = "DROP TRIGGER IF EXISTS `{triggerName}`".format(triggerName=triggerName)
         else:
             query = "DROP TRIGGER `{triggerName}`".format(triggerName=triggerName)
