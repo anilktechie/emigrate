@@ -77,6 +77,17 @@ class Migration(object):
             result = str(item.get(col_name))
         return result
 
+    def getVariables(self):
+        result = {}
+        query = "SHOW VARIABLES"
+        rows = self._query(query, named_tuple=True)
+        for row in rows:
+            item = dict(row)
+            name = str(item.get("Variable_name"))
+            value = str(item.get("Value"))
+            result[name] = value
+        return result
+
     def _query(self, query, params=None, named_tuple=False):
         return self._dbClient.query(query, params, named_tuple)
 
