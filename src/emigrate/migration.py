@@ -43,16 +43,25 @@ class Migration(object):
         print("Execute: %r with %r" % (query, params, ))
         self._execute(query, params)
 
-    def drop(self, tableName):
+    def dropTable(self, tableName, ifExists=True):
+        # Step 0. Check contract
         assert isinstance(tableName, (str, unicode))
-        #self.__log.debug("Drop table " + tableName + "...")
-        query = "DROP TABLE " + "`" + tableName + "`"
+        assert isinstance(ifExists, bool)
+        #
+        if ifExists is True:
+            query = "DROP TABLE IF EXISTS `{tableName}`".format(tableName=tableName)
+        else:
+            query = "DROP TABLE `{tableName}`".format(tableName=tableName)
         self._execute(query)
 
-    def dropIfExists(self, tableName):
-        assert isinstance(tableName, (str, unicode))
-        #self.__log.debug("Drop table " + tableName + "...")
-        query = "DROP TABLE IF EXISTS " + "`" + tableName + "`"
+    def dropTrigger(self, triggerName, ifExists=True):
+        assert isinstance(triggerName, (str, unicode))
+        assert isinstance(ifExists, bool)
+        #
+        if ifExists ie True:
+            query = "DROP TRIGGER IF EXISTS `{triggerName}`".format(triggerName=triggerName)
+        else:
+            query = "DROP TRIGGER `{triggerName}`".format(triggerName=triggerName)
         self._execute(query)
 
     def _execute(self, query, params=None):
@@ -60,6 +69,15 @@ class Migration(object):
 
     def _query(self, query, params=None):
         return self._dbClient.query(query, params)
+
+    def _debug(self, *args, **kwargs):
+        pass
+
+    def _warn(self, *args, **kwargs):
+        pass
+
+    def _error(self, *args, **kwargs):
+        pass
 
     def createTransaction(self):
         return DatabaseClientTransaction(dbClient=self._dbClient)
