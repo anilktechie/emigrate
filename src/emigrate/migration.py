@@ -67,8 +67,18 @@ class Migration(object):
     def _execute(self, query, params=None):
         self._dbClient.execute(query, params)
 
-    def _query(self, query, params=None):
-        return self._dbClient.query(query, params)
+    def getVersion(self):
+        result = None
+        col_name = "version"
+        query = "SELECT VERSION() AS `{col_name}`".format(col_name=col_name)
+        rows = self._query(query, named_tuple=True)
+        for row in rows:
+            item = dict(row)
+            result = str(item.get(col_name))
+        return result
+
+    def _query(self, query, params=None, named_tuple=False):
+        return self._dbClient.query(query, params, named_tuple)
 
     def _debug(self, *args, **kwargs):
         pass

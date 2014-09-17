@@ -72,16 +72,6 @@ class DatabaseClient(object):
     def rollback(self):
         self._cnx.rollback()
 
-    def getVersion(self):
-        result = None
-        col_name = "version"
-        query = "SELECT VERSION() AS `{col_name}`".format(col_name=col_name)
-        rows = self._query(query, named_tuple=True)
-        for row in rows:
-            item = dict(row)
-            result = str(item.get(col_name))
-        return result
-
     def query(self, query, params=None, named_tuple=False):
         """
         """
