@@ -72,15 +72,36 @@ class DatabaseClient(object):
     def rollback(self):
         self._cnx.rollback()
 
-    def query(self, query, params):
+    def getVersion(self):
+        result = None
+        col_name = "version"
+        query = "SELECT VERSION() AS `{col_name}`".format(col_name=col_name)
+        rows = self._query(query, named_tuple=True)
+        for row in rows:
+            item = dict(row)
+            result = str(item.get(col_name))
+        return result
+
+    def query(self, query, params=None, named_tuple=False):
         """
         """
         result = []
+        # Step 1. Create cursor
         dbCursor = self._cnx.cursor()
-        dbCursor.query(query, params)
+        # Step 2. Create request
+        if params is None:
+            dbCursor.execute(query)
+        else:
+            dbCursor.execute(query, params)
+        # Step 3. Loading result
+        column_names = dbCursor.column_names
         for row in dbCursor:
+            if named_tuple is True:
+                row = zip(column_names, row)
             result.append(row)
+        # Step 4. Close cursor
         dbCursor.close()
+        #
         return result
 
     def showTables(self):
