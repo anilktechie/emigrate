@@ -10,33 +10,60 @@ class DatabaseClient(object):
         self._params = params
         self._cnx = None
 
-    def makeConnect(self, raiseOnWarnings=True):
+    def makeConnect(self):
+        # Step 1. Prepare connection params
         kwargs = {
             "host": self._params.get("host", '127.0.0.1'),
-            "database": self._params.get("database", "test"),
             "user": self._params.get("user", "root"),
             "password": self._params.get("password", ""),
+            "raise_on_warnings": self._params.get("raise_on_warnings", False),
         }
-        #
-        if raiseOnWarnings:
-            kwargs['raise_on_warnings'] = True
-        #
+        # Step 2. Create connection
         try:
             self._cnx = mysql.connector.connect(**kwargs)
         except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_BAD_DB_ERROR:
-                sys.stderr.write("Database does not exists... create here...\n")
-            else:
-                raise err
+            raise err
+        # Step 3. Select database
+        dbName = self._params.get("database", "test")
+        self.selectDatabase(dbName, withCreate=True)
+
+    def selectDatabase(self, dbName, withCreate):
+        assert isinstance(withCreate, bool)
+        if withCreate is True:
+            # Step 1. Create database
+            self.createDatabase(dbName, ifNotExists=True)
+        # Step 2. Select this database
+        query = "USE `{dbName}`".format(dbName=dbName)
+        self.execute(query)
+
+    def createDatabase(self, dbName, charset="utf8", collation="utf8_general_ci", ifNotExists=False):
+        assert isinstance(ifNotExists, bool)
+        if ifNotExists is True:
+            query = "CREATE DATABASE IF NOT EXISTS `{dbName}` CHARACTER SET {charset} COLLATE {collation}".format(dbName=dbName, charset=charset, collation=collation)
+        else:
+            query = "CREATE DATABASE `{dbName}` CHARACTER SET {charset} COLLATE {collation}".format(dbName=dbName, charset=charset, collation=collation)
+        self.execute(query)
+
+    def dropDatabase(self, dbName, ifExists=False):
+        assert isinstance(ifExists, bool)
+        #
+        if ifExists is True:
+            query = "DROP DATABASE IF EXISTS `{dbName}`".format(dbName=dbName)
+        else:
+            query = "DROP DATABASE `{dbName}`".format(dbName=dbName)
+        self.execute(query)
 
     def close(self):
         if self._cnx is not None:
             self._cnx.close()
             self._cnx = None
 
-    def execute(self, query, params):
+    def execute(self, query, params=None):
         dbCursor = self._cnx.cursor()
-        dbCursor.execute(query, params)
+        if params is None:
+            dbCursor.execute(query)
+        else:
+            dbCursor.execute(query, params)
         dbCursor.close()
 
     def commit(self):

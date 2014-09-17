@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name = "emigrate",
-    version = "0.1.1",
+    version = "0.2",
     packages = ['emigrate'],
     package_dir = {'': 'src'},
     entry_points = {
