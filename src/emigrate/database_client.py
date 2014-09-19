@@ -17,6 +17,8 @@ class DatabaseClient(object):
             "user": self._params.get("user", "root"),
             "password": self._params.get("password", ""),
             "raise_on_warnings": self._params.get("raise_on_warnings", False),
+            "charset": self._params.get("charset", "utf8"),
+            "autocommit": self._params.get("autocommit", True),
         }
         # Step 2. Create connection
         try:
