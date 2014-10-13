@@ -12,6 +12,12 @@ class ApplicationCommand(object):
         :type app: Application
         """
         self._app = app
+        
+    def getApplication(self):
+        """
+        :rtype app: Application
+        """
+        return self._app
 
     def createDatabaseClient(self, autoConnect=False):
         result = DatabaseClient(self._app._params)
