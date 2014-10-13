@@ -40,4 +40,4 @@ class ApplicationCommandHelp(ApplicationCommand):
         """ Main entry point
         """
         help_message = self.__create_help_message()
-        sys.stdout.write(content)
+        sys.stdout.write(help_message)
