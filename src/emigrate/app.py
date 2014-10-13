@@ -15,6 +15,8 @@ from options_reader import OptionsReader
 
 
 class Application(object):
+    VERSION = "0.2.1"
+    
     """ Migrate is database update tools
     """
 
