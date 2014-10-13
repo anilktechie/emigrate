@@ -103,10 +103,6 @@ class Migration(object):
     def createTransaction(self):
         return DatabaseClientTransaction(dbClient=self._dbClient)
 
-    def dropTable(self, tableName):
-        query = "DROP TABLE `" + tableName + "`"
-        self._execute(query)
-
     @abstractmethod
     def up(self):
         pass
