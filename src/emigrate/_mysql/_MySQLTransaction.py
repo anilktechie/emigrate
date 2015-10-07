@@ -1,4 +1,7 @@
-class DatabaseClientTransaction(object):
+#
+
+
+class MySQLTransaction(object):
 
     def __init__(self, dbClient):
         self._dbClient = dbClient

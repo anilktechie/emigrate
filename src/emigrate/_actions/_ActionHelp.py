@@ -1,11 +1,16 @@
 #
+
 import sys
 
-from app_base import ApplicationCommand
+
+from emigrate import BaseAction
 
 
-class ApplicationCommandHelp(ApplicationCommand):
-    
+class ActionHelp(BaseAction):
+    def __init__(self, app):
+        BaseAction.__init__(self, app)
+        self.__app = app
+                            
     def __get_version(self, default="UNKNOWN"):
         result = default
         #
@@ -14,7 +19,7 @@ class ApplicationCommandHelp(ApplicationCommand):
             result = app.VERSION
         #
         return result
-    
+
     def __create_help_message(self):
         """ Create help message
         """
@@ -24,12 +29,12 @@ class ApplicationCommandHelp(ApplicationCommand):
         items.append("")
         items.append("The most commonly used commands are:")
         items.append("")
-        items.append("    create    - create migration in .migration directory")
-        items.append("    up        - upgrade migration operation")
-        items.append("    down      - downgrade migration operation")
-        items.append("    redo      - redo migration operation (when previous is with exception)")
-        items.append("    history   - show migration operation")
-        items.append("    new       - show new migration")
+        #
+        for actionName, actionType in self.__app.actions().items():
+            if hasattr(actionType, 'HELP'):
+                actionHelp = actionType.HELP
+                items.append("    {actionName:<10s} - {actionHelp:s}".format(actionName=actionName, actionHelp=actionHelp))
+        #
         items.append("")
         items.append("Emigrate is a tool for database schema version control.")
         items.append("For additional information, see http://www.github.com/vit1251/emigrate")

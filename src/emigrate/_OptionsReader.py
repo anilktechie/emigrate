@@ -3,8 +3,6 @@ import ConfigParser as configparser
 
 
 class OptionsReader(object):
-
-
     def read(self, name):
         result = {}
         config = configparser.RawConfigParser()

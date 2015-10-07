@@ -2,19 +2,19 @@
 import sys
 import logging
 
-from app_base import ApplicationCommand
-
-from migration_actor import MigrationActor
-from migration_loader import MigrationLoader
+from emigrate import BaseAction, MigrationActor, MigrationLoader
 
 
-class ApplicationCommandDown(ApplicationCommand):
+class ActionDown(BaseAction):
+    HELP = "downgrade migration operation"
+
     def __init__(self, app):
-        ApplicationCommand.__init__(self, app)
-        self.__log = logging.getLogger("emigrate.down")
+        BaseAction.__init__(self, app)
+        self.__log = logging.getLogger("emigrate.actions.down")
 
     def run(self):
-        migrationLoader = MigrationLoader(".migration")
+        migrationPath = self.migrationPath()
+        migrationLoader = MigrationLoader(migrationPath)
         migrations = migrationLoader.search()
         #
         migrations.sort(key=lambda item: getattr(item, "__module__"), reverse=True)

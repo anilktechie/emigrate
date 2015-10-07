@@ -1,18 +1,13 @@
 #
-from abc import ABCMeta, abstractmethod
 
-from database_client import DatabaseClient
-from emigrate.database_transaction import DatabaseClientTransaction
+from emigrate.mysql import MySQLClient, MySQLTransaction
 
 
 class Migration(object):
-    __metaclass__ = ABCMeta
-
     def __init__(self, dbClient):
         """
         :type dbClient: DatabaseClient
         """
-        isinstance(dbClient, DatabaseClient)
         self._dbClient = dbClient
 
     def insert(self, tableName, values):
@@ -103,22 +98,8 @@ class Migration(object):
     def createTransaction(self):
         return DatabaseClientTransaction(dbClient=self._dbClient)
 
-    @abstractmethod
     def up(self):
-        pass
+        raise NotImplementedError()
 
-    @abstractmethod
     def down(self):
-        pass
-
-
-if __name__ == "__main__":
-    class Migration1(Migration):
-        def up(self):
-            pass
-        def down(self):
-            pass 
-    conn = None
-    m = Migration1(conn)
-    m.insert("abc", {"name": "Vitold S", "id": 1, "value": "132.23"})
-
+        raise NotImplementedError()

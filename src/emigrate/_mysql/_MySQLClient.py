@@ -1,11 +1,12 @@
 #
+
 import sys
 
 import mysql.connector
 from mysql.connector import errorcode
 
 
-class DatabaseClient(object):
+class MySQLClient(object):
     def __init__(self, params):
         self._params = params
         self._cnx = None

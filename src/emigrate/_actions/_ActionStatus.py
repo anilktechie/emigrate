@@ -1,16 +1,19 @@
 #
+
 import sys
 import logging
 import datetime
 
-from app_base import ApplicationCommand
+from emigrate import BaseAction
 
 
-class ApplicationCommandHistory(ApplicationCommand):
+class ActionStatus(BaseAction):
+    HELP = "show migration status"
+
     def __init__(self, app):
-        ApplicationCommand.__init__(self, app)
+        BaseAction.__init__(self, app)
         #
-        self.__log = logging.getLogger("emigrate.history")
+        self.__log = logging.getLogger("emigrate.actions.status")
 
     def run(self):
         dbClient = self.createDatabaseClient(autoConnect=True)
@@ -18,8 +21,9 @@ class ApplicationCommandHistory(ApplicationCommand):
         params = {
             "limit": 100
         }
-        #
+        # Show headerws
         sys.stdout.write(" %20s %s\n" % ("Date", "Name", ))
+        # Show migrations
         rows = dbClient.query(query, params)
         for row in rows:
             currentDateTime = row.get("date")

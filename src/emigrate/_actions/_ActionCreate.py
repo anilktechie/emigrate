@@ -1,17 +1,20 @@
 #
+
 import os
 import sys
 import logging
 import uuid
 import datetime
 
-from app_base import ApplicationCommand
+from emigrate import BaseAction
 
 
-class ApplicationCommandCreate(ApplicationCommand):
+class ActionCreate(BaseAction):
+    HELP = "create new migration node in .migration directory"
+
     def __init__(self, app):
-        ApplicationCommand.__init__(self, app)
-        self.__log = logging.getLogger("emigrate.create")
+        BaseAction.__init__(self, app)
+        self.__log = logging.getLogger("emigrate.actions.create")
 
     def _createClassName(self, currentDateTime):
         dateTimePattern = "%Y%m%d%H%M%S"

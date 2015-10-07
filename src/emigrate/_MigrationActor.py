@@ -11,7 +11,7 @@ class MigrationActor(object):
 
     def __init__(self, dbClient):
         self._dbClient = dbClient
-        self.__log = logging.getLogger("emigrate.MigrationActor")
+        self.__log = logging.getLogger("emigrate")
 
     def makeMigrate(self, migrationCls, direction):
         """ Make migration

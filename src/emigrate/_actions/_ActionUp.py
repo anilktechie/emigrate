@@ -1,29 +1,23 @@
 #
+
 import os
 import sys
 import logging
 
-from app_base import ApplicationCommand
-
-from migration_actor import MigrationActor
-from migration_loader import MigrationLoader
+from emigrate import BaseAction, MigrationActor, MigrationLoader
 
 
-class ApplicationCommandUp(ApplicationCommand):
+class ActionUp(BaseAction):
+    HELP = "upgrade migration operation"
+
     def __init__(self, app):
-        ApplicationCommand.__init__(self, app)
-        self.__log = logging.getLogger("emigrate.up")
+        BaseAction.__init__(self, app)
+        self.__log = logging.getLogger("emigrate.actions.up")
 
     def run(self):
-        base_path = os.getcwd()
-        migration_path = os.path.join(base_path, ".migration")
         #
-        self.__log.info("Migration search directory: {migration_path!r}".format(migration_path=migration_path))
-        #
-        if not os.path.isdir(migration_path):
-            raise RuntimeError("No migration directory exists.")
-        #
-        migrationLoader = MigrationLoader(migration_path)
+        migrationPath = self.migrationPath()
+        migrationLoader = MigrationLoader(migrationPath)
         migrations = migrationLoader.search()
         #
         migrations.sort(key=lambda item: getattr(item, "__module__"))

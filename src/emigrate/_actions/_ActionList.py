@@ -1,14 +1,17 @@
 #
+
 import sys
 
-from app_base import ApplicationCommand
+from emigrate import BaseAction
+from emigrate import MigrationLoader
 
-from migration_loader import MigrationLoader
 
+class ActionList(BaseAction):
+    HELP = "show all assets migrations (list all migrations)"
 
-class ApplicationCommandNew(ApplicationCommand):
     def run(self):
-        migrationLoader = MigrationLoader(".migration")
+        migrationPath = self.migrationPath()
+        migrationLoader = MigrationLoader(migrationPath)
         migrations = migrationLoader.search()
         for migration in migrations:
             #
@@ -22,4 +25,4 @@ class ApplicationCommandNew(ApplicationCommand):
                 short_doc = doc_line
                 break
             #
-            sys.stdout.write("%-20s - %-20s\n" % (name, short_doc))
+            sys.stdout.write("| {migrationName:<20s} | {migrationDesc:<20s} | {migrationStatus:<20s} |\n".format(migrationName=name, migrationDesc=short_doc, migrationStatus="???"))
