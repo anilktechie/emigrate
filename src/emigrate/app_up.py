@@ -1,4 +1,5 @@
 #
+import os
 import sys
 import logging
 
@@ -14,7 +15,15 @@ class ApplicationCommandUp(ApplicationCommand):
         self.__log = logging.getLogger("emigrate.up")
 
     def run(self):
-        migrationLoader = MigrationLoader(".migration")
+        path = os.getcwd()
+        migration_path = os.path.join(base_path, ".migration")
+        #
+        self.__log.info("Migration search directory: {migration_path!r}".format(migration_path=migration_path))
+        #
+        if not os.path.isdir(migration_path):
+            raise RuntimeError("No migration directory exists.")
+        #
+        migrationLoader = MigrationLoader(migration_path)
         migrations = migrationLoader.search()
         #
         migrations.sort(key=lambda item: getattr(item, "__module__"))
