@@ -38,6 +38,7 @@ class ActionHelp(BaseAction):
         items.append("")
         items.append("Emigrate is a tool for database schema version control.")
         items.append("For additional information, see http://www.github.com/vit1251/emigrate")
+        items.append("")
         content = "\n".join(items)
         return content
     

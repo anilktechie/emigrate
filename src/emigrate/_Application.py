@@ -38,8 +38,8 @@ class Application(object):
 
     def _readingOptions(self):
         #
-        currentDirectory = os.getcwd()
-        currentPath = os.path.join(currentDirectory, ".emigraterc")
+        basePath = os.getcwd()
+        currentPath = os.path.join(basePath, ".emigraterc")
         #
         optionsReader = OptionsReader()
         self._params = optionsReader.read(currentPath)
