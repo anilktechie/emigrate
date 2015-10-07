@@ -15,7 +15,7 @@ class ApplicationCommandUp(ApplicationCommand):
         self.__log = logging.getLogger("emigrate.up")
 
     def run(self):
-        path = os.getcwd()
+        base_path = os.getcwd()
         migration_path = os.path.join(base_path, ".migration")
         #
         self.__log.info("Migration search directory: {migration_path!r}".format(migration_path=migration_path))
