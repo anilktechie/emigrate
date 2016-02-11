@@ -6,7 +6,8 @@ from emigrate import BaseAction, MigrationActor, MigrationLoader
 
 
 class ActionDown(BaseAction):
-    HELP = "downgrade migration operation"
+    NAME = "down"
+    DESC = "downgrade migration operation"
 
     def __init__(self, app):
         BaseAction.__init__(self, app)

@@ -10,6 +10,18 @@ class Migration(object):
         """
         self._dbClient = dbClient
 
+    @property
+    def tables(self):
+        result = []
+        #
+        query = "SHOW TABLES"
+        rows = self._query(query, named_tuple=True)
+        for row in rows:
+            print(row)
+        #
+        return result
+
+
     def insert(self, tableName, values):
         """ Insert value to database
         @type tableName: str

@@ -1,66 +1,91 @@
 #
+
 import os
 import sys
 import logging
 
-from emigrate.actions import ActionCreate, ActionStatus, ActionHelp, ActionList, ActionUp, ActionDown, ActionRedo, ActionConfig, ActionInfo
-from emigrate import OptionsReader
+import yaml
+
+from emigrate.actions import ActionCreate, ActionStatus, ActionHelp, ActionList, ActionUp, ActionDown, ActionRedo, ActionInit, ActionInfo, ActionGenerate
 
 
 class Application(object):
-    VERSION = "0.2.1"
-    
+    VERSION = "0.4"
+
     """ Migrate is database update tools
     """
 
     def __init__(self):
         #
-        self._params = None
+        self._settings = {}
         #
         self.__log = logging.getLogger("emigrate")
         #
-        self._readingOptions()
+        self._readSettings()
         #
-        self.__actions = {
-            "create"  : ActionCreate,
-            "help"    : ActionHelp,
-            "up"      : ActionUp,
-            "down"    : ActionDown,
-            "list"    : ActionList,
-            "redo"    : ActionRedo,
-            "config"  : ActionConfig,
-            "info"    : ActionInfo,
-            "status"  : ActionStatus,
-        }
+        self._actions = (
+            ActionCreate,
+            ActionGenerate,
+            ActionHelp,
+            ActionUp,
+            ActionDown,
+            ActionList,
+            ActionRedo,
+            ActionInit,
+            ActionInfo,
+            ActionStatus,
+        )
 
+
+    @property
+    def settings(self):
+        """ Returns settings (read-only)
+        """
+        return self._settings
+
+
+    @property
     def actions(self):
-        return self.__actions
+        """ Returns actions (read-only)
+        """
+        return self._actions
 
-    def _readingOptions(self):
-        #
-        basePath = os.getcwd()
-        currentPath = os.path.join(basePath, ".emigraterc")
-        #
-        optionsReader = OptionsReader()
-        self._params = optionsReader.read(currentPath)
 
-    def invokeAction(self, actionName):
-        actionType = self.__actions.get(actionName)
-        if actionType is not None:
-            action = actionType(app=self)
-            action.run()
-        else:
+    def _readSettings(self):
+        #
+        basepath = os.getcwd()
+        filename = os.path.join(basepath, ".emigraterc")
+        #
+        if os.path.isfile(filename):
+            with open(filename, "rb") as stream:
+                self._settings = yaml.load(stream)
+
+
+    def invokeAction(self, action_name):
+        executed = False
+        for action in self._actions:
+            cur_action_name = action.NAME
+            if cur_action_name == action_name:
+                a = action(app=self)
+                a.run()
+                executed = True
+        #
+        if executed is False:
             self.unknowCommand(actionName)
+
 
     def usage(self):
         self.invokeAction('help')
+
 
     def unknowCommand(self, name):
         content = "No action {name!r}. Please use 'help' to more info.\n".format(name=name)
         sys.stdout.write(content)
 
+
     def dispose(self):
         pass
+
 
     def run(self, argv):
         argc = len(argv)

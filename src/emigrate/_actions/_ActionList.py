@@ -7,7 +7,9 @@ from emigrate import MigrationLoader
 
 
 class ActionList(BaseAction):
-    HELP = "show all assets migrations (list all migrations)"
+    NAME = "list"
+    DESC = "show all assets migrations (list all migrations)"
+
 
     def run(self):
         migrationPath = self.migrationPath()

@@ -2,8 +2,8 @@
 
 import sys
 
-import mysql.connector
-from mysql.connector import errorcode
+import MySQLdb
+import MySQLdb.cursors
 
 
 class MySQLClient(object):
@@ -14,21 +14,24 @@ class MySQLClient(object):
     def makeConnect(self):
         # Step 1. Prepare connection params
         kwargs = {
-            "host": self._params.get("host", '127.0.0.1'),
-            "user": self._params.get("user", "root"),
-            "password": self._params.get("password", ""),
-            "raise_on_warnings": self._params.get("raise_on_warnings", False),
-            "charset": self._params.get("charset", "utf8"),
-            "autocommit": self._params.get("autocommit", True),
+            "host"             : self._params.get("host", '127.0.0.1'),
+            "user"             : self._params.get("user", "root"),
+            "passwd"           : self._params.get("passwd", ""),
+            #"raise_on_warnings": self._params.get("raise_on_warnings", False),
+            "charset"          : self._params.get("charset", "utf8"),
+            #"autocommit"       : self._params.get("autocommit", True),
         }
         # Step 2. Create connection
         try:
-            self._cnx = mysql.connector.connect(**kwargs)
-        except mysql.connector.Error as err:
+            self._cnx = MySQLdb.connect(**kwargs)
+        except Exception as err:
             raise err
         # Step 3. Select database
-        dbName = self._params.get("database", "test")
-        self.selectDatabase(dbName, withCreate=True)
+        dbName = self._params.get("db", "test")
+        if dbName is not None:
+            if dbName != "":
+                self.selectDatabase(dbName, withCreate=False)
+
 
     def selectDatabase(self, dbName, withCreate):
         assert isinstance(withCreate, bool)
@@ -80,26 +83,33 @@ class MySQLClient(object):
         """
         result = []
         # Step 1. Create cursor
-        dbCursor = self._cnx.cursor()
+        curr = self._cnx.cursor(MySQLdb.cursors.SSCursor)
         # Step 2. Create request
         if params is None:
-            dbCursor.execute(query)
+            curr.execute(query)
         else:
-            dbCursor.execute(query, params)
+            curr.execute(query, params)
         # Step 3. Loading result
-        column_names = dbCursor.column_names
-        for row in dbCursor:
+        column_names = []
+        for column_description in curr.description:
+            name, type_code, display_size, internal_size, precision, scale, null_ok = column_description
+            column_names.append(name)
+        #
+        for row in curr:
             if named_tuple is True:
                 row = zip(column_names, row)
             result.append(row)
         # Step 4. Close cursor
-        dbCursor.close()
+        curr.close()
         #
         return result
 
     def showTables(self):
         result = []
+        #
         query = "SHOW TABLES"
         params = {}
+        #
         rows = self.query(query, params)
+        #
         return result

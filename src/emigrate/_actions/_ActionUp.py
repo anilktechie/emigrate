@@ -8,7 +8,8 @@ from emigrate import BaseAction, MigrationActor, MigrationLoader
 
 
 class ActionUp(BaseAction):
-    HELP = "upgrade migration operation"
+    NAME = "up"
+    DESC = "upgrade migration operation"
 
     def __init__(self, app):
         BaseAction.__init__(self, app)

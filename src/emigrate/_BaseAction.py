@@ -13,12 +13,15 @@ class BaseAction(object):
         """
         self.__log = logging.getLogger('emigrate.actions')
         self._app = app
-        
-    def getApplication(self):
+
+
+    @property
+    def app(self):
         """
         :rtype app: Application
         """
         return self._app
+
 
     def migrationPath(self):
         base_path = os.getcwd()
@@ -30,6 +33,7 @@ class BaseAction(object):
             raise RuntimeError("No migration directory exists.")
         #
         return migration_path
+
 
     def createDatabaseClient(self, autoConnect=False):
         result = MySQLClient(self._app._params)

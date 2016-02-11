@@ -8,7 +8,9 @@ from emigrate import BaseAction
 
 
 class ActionStatus(BaseAction):
-    HELP = "show migration status"
+    NAME = "status"
+    DESC = "show migration status"
+
 
     def __init__(self, app):
         BaseAction.__init__(self, app)
