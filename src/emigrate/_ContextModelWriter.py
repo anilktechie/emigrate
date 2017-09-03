@@ -9,7 +9,14 @@ from ._ContextModel import ContextModel
 
 class ContextModelWriter(object):
 
-    def write(self, path, cm_model):
+
+    def _write_content(self, path, content):
+        with open(path, "wb") as stream:
+            stream.write(content)
+            stream.close()
+
+
+    def write(self, path, cm_model, pretty_print=True):
         """ Write model on disk
 
         @param str path:
@@ -24,4 +31,9 @@ class ContextModelWriter(object):
             ET.SubElement(node_conn, "param", name="username", value=str(c.username))
             ET.SubElement(node_conn, "param", name="password", value=str(c.password))
         tree = ET.ElementTree(root)
-        tree.write(path)
+        content = ET.tostring(root)
+        if pretty_print:
+            import xml.dom.minidom
+            xml = xml.dom.minidom.parseString(content)
+            content = xml.toprettyxml()
+        self._write_content(path, content)
