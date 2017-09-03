@@ -1,14 +1,13 @@
 #
 
-from emigrate.mysql import MySQLClient, MySQLTransaction
+from __future__ import absolute_import
 
 
 class Migration(object):
-    def __init__(self, dbClient):
-        """
-        :type dbClient: DatabaseClient
-        """
-        self._dbClient = dbClient
+
+    def __init__(self):
+        pass
+
 
     @property
     def tables(self):

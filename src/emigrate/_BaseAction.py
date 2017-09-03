@@ -1,26 +1,26 @@
 #
 
+from __future__ import absolute_import
+
+from sys import stdout
+
 import os
 import logging
 
-from emigrate.mysql import MySQLClient
-
 
 class BaseAction(object):
-    def __init__(self, app):
+    def __init__(self, context):
         """
         :type app: Application
         """
         self.__log = logging.getLogger('emigrate.actions')
-        self._app = app
+        self._context = context
 
 
-    @property
-    def app(self):
+    def report(self, msg, error=False):
+        """ Report message
         """
-        :rtype app: Application
-        """
-        return self._app
+        stdout.write("{msg}\n".format(msg=msg))
 
 
     def migrationPath(self):
@@ -40,6 +40,7 @@ class BaseAction(object):
         if autoConnect is True:
             result.makeConnect()
         return result
+
 
     def run(self):
         raise NotImplementedError()

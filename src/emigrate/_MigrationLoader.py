@@ -1,4 +1,7 @@
 #
+
+from __future__ import absolute_import
+
 import os
 import imp
 import inspect
@@ -6,10 +9,12 @@ import logging
 
 
 class MigrationLoader(object):
+
     def __init__(self, base_path, class_prefix="Migration_"):
         self._base_path = base_path
         self._class_prefix = class_prefix
         self.__log = logging.getLogger("emigrate.MigrationLoader")
+
 
     def _search_modules(self):
         result = []
@@ -22,6 +27,7 @@ class MigrationLoader(object):
                 migration = imp.load_source(mod_name, path)
                 result.append(migration)
         return result
+
 
     def _search_classes(self):
         result = []
@@ -37,6 +43,25 @@ class MigrationLoader(object):
                         result.append(attr)
         return result
 
+
     def search(self):
         classes = self._search_classes()
         return classes
+
+
+    def discover(self):
+        migrationPath = self.migrationPath()
+        migrationLoader = MigrationLoader(migrationPath)
+        migrations = migrationLoader.search()
+        for migration in migrations:
+            #
+            name = str(getattr(migration, "__module__", ""))
+            docs = str(getattr(migration, "__doc__", ""))
+            doc_lines = docs.split("\n")
+            #
+            short_doc = ""
+            for doc_line in doc_lines:
+                doc_line = doc_line.strip()
+                short_doc = doc_line
+                break
+            #

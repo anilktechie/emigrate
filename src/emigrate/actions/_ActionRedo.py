@@ -1,6 +1,8 @@
 #
 
-from emigrate import BaseAction
+from __future__ import absolute_import
+
+from .._BaseAction import BaseAction
 
 
 class ActionRedo(BaseAction):

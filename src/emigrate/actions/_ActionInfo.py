@@ -1,8 +1,10 @@
 #
 
+from __future__ import absolute_import
+
 import sys
 
-from emigrate import BaseAction
+from .._BaseAction import BaseAction
 
 
 class ActionInfo(BaseAction):

@@ -1,53 +1,84 @@
 emigrate
 ========
 
-Emigrate is Python 2.x console application to migration MySQL database store on Python migration scenarios.
+Emigrate is Python application for create and manage database migration (now support only MySQL).
 
-### Quick start and example
+### Quick start
 
-1. Create new migration in ".migrations" directory of your product
+1. Initialize migration system
 
     ```bash
-    $ emig create
+    $ python -m emigrate init
     ```
 
-2. Make change your migration
+2. Creating new migration in ".migration" directory:
+
+    ```bash
+    $ python -m emigrate create
+    ```
+
+3. Change migration source code
 
     ```py
     class Migration_20140212165434(Migration):
         """ Create `users` tables and insert admin account
         """
-        
+
         def up(self):
-            # Step 1. Create table (we may also check database exist to provide idempotency)
-            query = "CREATE TABLE `example` ..."
+            """ Update
+
+            - Create table `users`
+            - Create table `user_pendings`
+
+            """
+            query = "CREATE TABLE `users` ..."
             self.execute(query)
-            # Step 2. You may execute insert SQL
-            query = "INSERT ..."
+
+            query = "CREATE TABLE `user_pending` ..."
             self.execute(query)
-            # Step 3. Another way to populate database
-            self.insert("")
+
 
         def down(self):
-            # Step 1. Drop table
-            query = "DROP TABLE `example`"
+            """ Revert
+
+            - Delete table `users`
+            - Delete table `user_pending`
+
+            """
+            query = "DROP TABLE `users`"
             self.execute(query)
+
+            query = "DROP TABLE `user_pending`"
+            self.execute(query)
+
     ```
 
-2. Create or update ".emigraterc"
+4. Setup environment in "emigrate.xml"
 
-    ```ini
-    [database]
-    type=mysql
-    schema="smm"
-    host=...
-    port=...
-    username=...
-    password=...
+    ```xml
+    <?xml version="1.0" encoding="utf-8" ?>
+
+    <emigrate version="0.5">
+        <connection name="default">
+            <option name="driver" value="mysql" />
+            <option name="schema" value="smm" />
+            <option name="host" value="127.0.0.1" />
+            <option name="port" value="3333" />
+            <option name="username" value="root" />
+            <option name="password" value="******" />
+        </connection>
+    </emigrate>
     ```
 
-3. Emigrate your migrations to "up".
+5. Migration command: "status", "up" or "down".
 
     ```bash
-    $ emig up
+    $ python -m emigrate status
     ```
+
+# Isolation
+
+All operation working in autocommit mode by default and you should create transaction scope
+by hand for working inside transaction.
+
+You may understand that create transaction start in separate connection.

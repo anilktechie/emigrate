@@ -1,54 +1,60 @@
-#
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import
 
 import os
-import sys
-import logging
+from sys import exit, argv, stdout
+from logging import getLogger
 
-import yaml
+from ._Context import Context
 
-from emigrate.actions import ActionCreate, ActionStatus, ActionHelp, ActionList, ActionUp, ActionDown, ActionRedo, ActionInit, ActionInfo, ActionGenerate
+from ._BaseAction import BaseAction
+
+from .actions import ActionHelp
+from .actions import ActionInit
+from .actions import ActionCreate
+from .actions import ActionList
+from .actions import ActionVerify
+from .actions import ActionUp
+from .actions import ActionDown
+from .actions import ActionRedo
 
 
 class Application(object):
-    VERSION = "0.4"
-
     """ Migrate is database update tools
     """
 
     def __init__(self):
-        #
+        self.__log = getLogger("emigrate")
         self._settings = {}
-        #
-        self.__log = logging.getLogger("emigrate")
-        #
-        self._readSettings()
-        #
-        self._actions = (
-            ActionCreate,
-            ActionGenerate,
-            ActionHelp,
-            ActionUp,
-            ActionDown,
-            ActionList,
-            ActionRedo,
-            ActionInit,
-            ActionInfo,
-            ActionStatus,
-        )
+        self.actions = []
+        self._context = None
 
 
-    @property
-    def settings(self):
-        """ Returns settings (read-only)
+    def initialize(self, **kwargs):
+
+        # Step 1. Create context
+        self._context = Context(app=self)
+
+        # Step 2. Register action's
+        self.register_action(ActionHelp)
+        self.register_action(ActionInit)
+        self.register_action(ActionCreate)
+        self.register_action(ActionList)
+        self.register_action(ActionVerify)
+        #self.register_action(ActionUp)
+        #self.register_action(ActionDown)
+        #self.register_action(ActionRedo)
+
+
+    def register_action(self, action):
+        """ Register action (action is type)
+
+        @param BaseAction action:
         """
-        return self._settings
+        assert issubclass(action, BaseAction)
+        self.actions.append(action)
 
-
-    @property
-    def actions(self):
-        """ Returns actions (read-only)
-        """
-        return self._actions
 
 
     def _readSettings(self):
@@ -61,26 +67,51 @@ class Application(object):
                 self._settings = yaml.load(stream)
 
 
-    def invokeAction(self, action_name):
-        executed = False
-        for action in self._actions:
+    def search_action(self, action_name):
+        """ Search action by name
+
+        @param str action_name
+        """
+        result = None
+        for action in self.actions:
             cur_action_name = action.NAME
             if cur_action_name == action_name:
-                a = action(app=self)
-                a.run()
-                executed = True
-        #
-        if executed is False:
-            self.unknowCommand(actionName)
+                result = action
+                break
+        return result
+
+
+    def process_action(self, action):
+        """ Process action
+        """
+        a_inst = action(context=self._context)
+        a_inst.run()
+
+
+    def invoke_action(self, action_name):
+        """ Invoke action
+
+        @param str action_name
+        """
+        self.__log.debug("invoke_action: action_name = {action_name!r}".format(action_name=action_name))
+
+        # Step 1. Search action
+        action = self.search_action(action_name)
+
+        # Step 2. Process action
+        if action:
+            self.process_action(action)
+        else:
+            self.no_action(action_name)
 
 
     def usage(self):
         self.invokeAction('help')
 
 
-    def unknowCommand(self, name):
-        content = "No action {name!r}. Please use 'help' to more info.\n".format(name=name)
-        sys.stdout.write(content)
+    def no_action(self, action_name):
+        content = "'{action_name}' is not emigrate command. See 'emigrate help'\n".format(action_name=action_name)
+        stdout.write(content)
 
 
     def dispose(self):
@@ -88,20 +119,16 @@ class Application(object):
 
 
     def run(self, argv):
+        """ Main process
+        """
+        rc = 1
+
         argc = len(argv)
         if argc > 1:
-            actionName = str(argv[1])
-            self.invokeAction(actionName)
+            action_name = str(argv[1])
+            rc = self.invoke_action(action_name)
         else:
             self.usage()
-        #
-        return 0
 
+        return rc
 
-def main():
-    app = Application()
-    app.run(sys.argv)
-
-
-if __name__ == "__main__":
-    sys.exit(main())

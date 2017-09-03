@@ -1,10 +1,12 @@
 #
 
+from __future__ import absolute_import
+
 import os
 import sys
 import logging
 
-from emigrate import BaseAction, MigrationActor, MigrationLoader
+from .._BaseAction import BaseAction
 
 
 class ActionUp(BaseAction):
