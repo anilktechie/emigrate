@@ -4,13 +4,13 @@ from __future__ import absolute_import
 
 from sys import stdout
 
-from .._BaseAction import BaseAction
 
-
-class ActionHelp(BaseAction):
+class ActionHelp(object):
     NAME = "help"
     DESC = "show help"
 
+    def __init__(self, context):
+        self._context = context
 
     def make_help_content(self):
         """ Create help message
@@ -22,7 +22,8 @@ class ActionHelp(BaseAction):
         items.append("The most commonly used commands are:")
         items.append("")
 
-        for action in self._context.app.actions:
+        command_service = self._context.get_object('CommandService')
+        for action in command_service.actions:
             if hasattr(action, 'DESC'):
                 name = action.NAME
                 msg = action.DESC
