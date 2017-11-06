@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from logging import getLogger
 
 
-class MigrationRegistryManager(object):
+class RegManager(object):
 
     def __init__(self, context):
         self.__log = getLogger('emigrate.migration_registry_manager')

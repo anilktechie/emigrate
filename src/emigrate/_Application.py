@@ -18,6 +18,9 @@ from .actions import ActionVerify
 from .actions import ActionUp
 from .actions import ActionDown
 from .actions import ActionRedo
+from .actions import ActionStatus
+
+from .service import CommandService
 
 
 class Application(object):
@@ -27,34 +30,25 @@ class Application(object):
     def __init__(self):
         self.__log = getLogger("emigrate")
         self._settings = {}
-        self.actions = []
         self._context = None
 
 
     def initialize(self, **kwargs):
 
         # Step 1. Create context
-        self._context = Context(app=self)
+        self._context = Context()
 
-        # Step 2. Register action's
-        self.register_action(ActionHelp)
-        self.register_action(ActionInit)
-        self.register_action(ActionCreate)
-        self.register_action(ActionList)
-        self.register_action(ActionVerify)
-        #self.register_action(ActionUp)
-        #self.register_action(ActionDown)
-        #self.register_action(ActionRedo)
-
-
-    def register_action(self, action):
-        """ Register action (action is type)
-
-        @param BaseAction action:
-        """
-        assert issubclass(action, BaseAction)
-        self.actions.append(action)
-
+        command_service = CommandService(self._context)
+        command_service.initialize()
+        command_service.register_action(ActionHelp)
+        #command_service.register_action(ActionInit)
+        #command_service.register_action(ActionCreate)
+        #command_service.register_action(ActionList)
+        #command_service.register_action(ActionVerify)
+        #command_service.register_action(ActionUp)
+        #command_service.register_action(ActionDown)
+        command_service.register_action(ActionStatus)
+        self._context.register('CommandService', command_service)
 
 
     def _readSettings(self):
@@ -67,53 +61,6 @@ class Application(object):
                 self._settings = yaml.load(stream)
 
 
-    def search_action(self, action_name):
-        """ Search action by name
-
-        @param str action_name
-        """
-        result = None
-        for action in self.actions:
-            cur_action_name = action.NAME
-            if cur_action_name == action_name:
-                result = action
-                break
-        return result
-
-
-    def process_action(self, action):
-        """ Process action
-        """
-        a_inst = action(context=self._context)
-        a_inst.run()
-
-
-    def invoke_action(self, action_name):
-        """ Invoke action
-
-        @param str action_name
-        """
-        self.__log.debug("invoke_action: action_name = {action_name!r}".format(action_name=action_name))
-
-        # Step 1. Search action
-        action = self.search_action(action_name)
-
-        # Step 2. Process action
-        if action:
-            self.process_action(action)
-        else:
-            self.no_action(action_name)
-
-
-    def usage(self):
-        self.invokeAction('help')
-
-
-    def no_action(self, action_name):
-        content = "'{action_name}' is not emigrate command. See 'emigrate help'\n".format(action_name=action_name)
-        stdout.write(content)
-
-
     def dispose(self):
         pass
 
@@ -123,12 +70,14 @@ class Application(object):
         """
         rc = 1
 
+        command_service = self._context.get_object('CommandService')
+
         argc = len(argv)
         if argc > 1:
             action_name = str(argv[1])
-            rc = self.invoke_action(action_name)
+            rc = command_service.invoke_action(action_name)
         else:
-            self.usage()
+            command_service.usage()
 
         return rc
 
